@@ -1,9 +1,7 @@
 # Profile Authentication App - Frontend
 
-A modern React Native application built with Expo, featuring authentication, user profiles, and responsive design for web, iOS, and Android platforms.
-
-## 🚀 Quick Start
-
+A modern React Native application built with Expo, featuring authentication, user profiles, and responsive design for web, and mobile platforms.
+Time spent: 1 day
 ### Prerequisites
 
 - **Node.js** (v18 or higher)
@@ -47,7 +45,7 @@ The app connects to the FastAPI backend at `http://localhost:8000`. Ensure the b
 - MySQL database with user profiles table
 - CORS enabled for `http://localhost:8081` and `http://localhost:8082`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 app/
@@ -76,7 +74,7 @@ constants/
 └── theme.ts             # Theme colors and design tokens
 ```
 
-## 🎨 Key Features
+## Key Features
 
 ### Authentication
 - **Secure Login/Signup** with JWT tokens
@@ -96,44 +94,6 @@ constants/
 - **Touch-optimized** UI for mobile devices
 - **Keyboard-aware** forms with proper behavior
 
-## 🏗️ Architectural Decisions
-
-### 1. **File-Based Routing (Expo Router)**
-- Automatic route generation from file structure
-- Type-safe navigation with `Href` types
-- Stack and Tab navigators for intuitive UX
-- **Benefit:** Reduces boilerplate, improves maintainability
-
-### 2. **Centralized API Layer**
-- Single `api.ts` file for all HTTP requests
-- Axios interceptors for automatic JWT token attachment
-- Consistent error handling across the app
-- **Benefit:** Easy to modify endpoints, add auth logic globally
-
-### 3. **StyleSheet over CSS-in-JS**
-- React Native's `StyleSheet.create` for styling
-- Theme constants for consistent design tokens
-- Platform-specific adjustments when needed
-- **Benefit:** Better performance, React Native compatibility
-
-### 4. **Responsive Hook Pattern**
-- Custom `useResponsive()` hook for screen size detection
-- 768px breakpoint for mobile/desktop distinction
-- Conditional rendering based on device size
-- **Benefit:** Clean separation of mobile/desktop layouts
-
-### 5. **Secure Token Management**
-- `expo-secure-store` for encrypted token storage
-- Tokens sent via Authorization header
-- Logout clears tokens properly
-- **Benefit:** Enhanced security, follows best practices
-
-### 6. **Component Reusability**
-- Shared `IconSymbol` for cross-platform icons
-- Consistent form inputs and buttons
-- Reusable error/success banners
-- **Benefit:** DRY principle, easier to maintain
-
 ## 🛠️ Technologies
 
 | Category | Technology | Purpose |
@@ -146,7 +106,7 @@ constants/
 | **Styling** | StyleSheet | React Native styling |
 | **Language** | TypeScript | Type safety |
 
-## 📱 Screens Overview
+## Screens Overview
 
 ### Login Screen
 - Email and password validation
@@ -178,12 +138,7 @@ constants/
 - Legal links (terms, privacy policy)
 - Logout option
 
-## 🚧 Development
-
-### Running Tests
-```bash
-npm test
-```
+## Development
 
 ### Building for Production
 ```bash
@@ -197,20 +152,7 @@ npm run build:ios
 npm run build:android
 ```
 
-### Linting & Formatting
-```bash
-npm run lint
-npm run format
-```
-
-## 🔒 Security Notes
-
-- JWT tokens stored in encrypted secure storage
-- API calls include auth headers automatically
-- Passwords never stored client-side
-- HTTPS recommended for production
-
-## 📝 API Endpoints Used
+## API Endpoints Used
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
@@ -218,19 +160,3 @@ npm run format
 | `/auth/login` | POST | User authentication |
 | `/profile/me` | GET | Fetch current user profile |
 | `/profile/me` | PUT | Update user profile |
-
-## 🎯 Future Enhancements
-
-- [ ] Profile picture upload
-- [ ] Push notifications
-- [ ] Offline mode with data persistence
-- [ ] Multi-language support (i18n)
-- [ ] Dark mode toggle (currently dark only)
-
-## 📄 License
-
-This project is part of a profile management system demonstration.
-
----
-
-**Built with ❤️ using React Native & Expo**
