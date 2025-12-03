@@ -5,12 +5,14 @@ import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { profile } from '@/services/api';
 import { AxiosError } from 'axios';
+import { useResponsive } from '@/hooks/use-responsive';
 
 export default function EditProfileScreen() {
     const router = useRouter();
+    const { isMobile } = useResponsive();
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
-    const [email, setEmail] = useState(''); // Email is read-only in update
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -70,7 +72,7 @@ export default function EditProfileScreen() {
 
     const getStrengthColor = (score: number) => {
         if (score >= 80) return Colors.dark.tint;
-        if (score >= 40) return '#FBBF24'; // Amber
+        if (score >= 40) return '#FBBF24';
         return Colors.dark.error;
     };
 
@@ -91,25 +93,32 @@ export default function EditProfileScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <IconSymbol name="chevron.left" size={24} color={Colors.dark.text} />
                 </TouchableOpacity>
-                <Text style={styles.navTitle}>Update Profile</Text>
+                <Text style={styles.navTitle}>Edit Profile</Text>
                 <View style={styles.navSpacer} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-                <View style={styles.desktopContainer}>
+            <ScrollView
+                contentContainerStyle={isMobile ? styles.mobileScrollContent : styles.desktopScrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.profileCard}>
                     <View style={styles.avatarSection}>
                         <View style={styles.avatarContainer}>
                             <Image
                                 source={{ uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=random&size=150` }}
                                 style={styles.avatar}
                             />
-                            <TouchableOpacity style={styles.editIconContainer} activeOpacity={0.8}>
-                                <IconSymbol name="pencil" size={18} color="#04121C" />
-                            </TouchableOpacity>
                         </View>
                     </View>
 
                     <View style={styles.form}>
+                        {error ? (
+                            <View style={styles.errorBanner}>
+                                <IconSymbol name="exclamationmark.circle" size={20} color={Colors.dark.error} />
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        ) : null}
+
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Full Name</Text>
                             <TextInput
@@ -117,81 +126,65 @@ export default function EditProfileScreen() {
                                 value={name}
                                 onChangeText={setName}
                                 placeholder="Enter your name"
-                                placeholderTextColor="#586380"
+                                placeholderTextColor="#6B7280"
                             />
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <View style={styles.bioHeader}>
-                                <Text style={styles.label}>Bio</Text>
-                                <Text style={styles.charCount}>{bio.length}/150</Text>
+                            <Text style={styles.label}>Email (Read-only)</Text>
+                            <View style={styles.readOnlyInput}>
+                                <Text style={styles.readOnlyText}>{email}</Text>
                             </View>
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Bio</Text>
                             <TextInput
-                                style={[styles.input, styles.textArea]}
+                                style={[styles.input, styles.bioInput]}
                                 value={bio}
                                 onChangeText={setBio}
-                                placeholder="Enter your bio"
-                                placeholderTextColor="#586380"
+                                placeholder="Tell us about yourself..."
+                                placeholderTextColor="#6B7280"
                                 multiline
                                 numberOfLines={4}
                                 maxLength={150}
+                                textAlignVertical="top"
                             />
+                            <Text style={styles.charCount}>{bio.length}/150</Text>
                         </View>
 
-                        <View style={styles.strengthContainer}>
+                        <View style={styles.strengthSection}>
                             <View style={styles.strengthHeader}>
                                 <Text style={styles.strengthLabel}>Profile Strength</Text>
                                 <Text style={[styles.strengthValue, { color: getStrengthColor(profileStrength) }]}>
                                     {getStrengthLabel(profileStrength)}
                                 </Text>
                             </View>
-                            <View style={styles.progressBarBackground}>
+                            <View style={styles.strengthBarBg}>
                                 <View
                                     style={[
-                                        styles.progressBarFill,
-                                        {
-                                            width: `${profileStrength}%`,
-                                            backgroundColor: getStrengthColor(profileStrength)
-                                        }
+                                        styles.strengthBarFill,
+                                        { width: `${profileStrength}%`, backgroundColor: getStrengthColor(profileStrength) }
                                     ]}
                                 />
                             </View>
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Email (Read-only)</Text>
-                            <View style={styles.readOnlyInputWrapper}>
-                                <TextInput
-                                    style={[styles.input, styles.readOnlyInput]}
-                                    value={email}
-                                    editable={false}
-                                    placeholder="e.g., your@email.com"
-                                    placeholderTextColor="#586380"
-                                />
-                                <IconSymbol name="lock.fill" size={20} color="#666" />
-                            </View>
-                        </View>
-
                         {isSuccess ? (
-                            <View style={styles.successMessage}>
-                                <IconSymbol name="checkmark.circle.fill" size={20} color={Colors.dark.tint} />
+                            <View style={styles.successBanner}>
+                                <IconSymbol name="checkmark.circle.fill" size={22} color="#04121C" />
                                 <Text style={styles.successText}>Profile updated successfully!</Text>
                             </View>
                         ) : null}
 
-                        {error ? (
-                            <View style={styles.errorMessage}>
-                                <IconSymbol name="exclamationmark.circle" size={20} color={Colors.dark.error} />
-                                <Text style={styles.errorText}>{error}</Text>
-                            </View>
-                        ) : null}
-
                         <TouchableOpacity
-                            style={[styles.saveButton, isSaving && styles.buttonDisabled]}
+                            style={[styles.saveButton, (isSaving || isSuccess) && styles.buttonDisabled]}
                             onPress={handleSave}
-                            disabled={isSaving}
+                            disabled={isSaving || isSuccess}
                         >
-                            <Text style={styles.saveButtonText}>{isSaving ? 'Saving...' : 'Save Changes'}</Text>
+                            <Text style={styles.saveButtonText}>
+                                {isSaving ? 'Saving...' : isSuccess ? 'Saved!' : 'Save Changes'}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -205,13 +198,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.dark.background,
     },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     navHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
         paddingTop: 56,
-        paddingBottom: 24,
+        paddingBottom: 16,
     },
     backButton: {
         padding: 8,
@@ -220,18 +217,29 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '700',
         color: Colors.dark.text,
-        letterSpacing: 0.2,
+        letterSpacing: 0.3,
     },
     navSpacer: {
-        width: 24,
+        width: 40,
     },
-    scrollContent: {
-        paddingBottom: 40,
-        alignItems: 'center', // Center desktop container
+    mobileScrollContent: {
+        padding: 24,
+        paddingBottom: 48,
     },
-    desktopContainer: {
+    desktopScrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 48,
+    },
+    profileCard: {
         width: '100%',
         maxWidth: 600,
+        backgroundColor: Colors.dark.card,
+        borderRadius: 24,
+        padding: 40,
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
     avatarSection: {
         alignItems: 'center',
@@ -244,183 +252,136 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        borderWidth: 4,
-        borderColor: Colors.dark.tint,
-    },
-    editIconContainer: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        backgroundColor: Colors.dark.tint,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 3,
-        borderColor: Colors.dark.background,
-        shadowColor: '#0F172A',
-        shadowOpacity: 0.35,
-        shadowOffset: { width: 0, height: 6 },
-        shadowRadius: 10,
-        elevation: 4,
     },
     form: {
-        paddingHorizontal: 24,
+        width: '100%',
     },
     inputContainer: {
         marginBottom: 24,
     },
     label: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#9BA1A6',
+        fontWeight: '600',
+        color: Colors.dark.text,
         marginBottom: 8,
+        letterSpacing: 0.2,
     },
     input: {
-        backgroundColor: Colors.dark.card,
-        borderRadius: 16,
-        paddingHorizontal: 18,
-        paddingVertical: 16,
-        fontSize: 16,
+        height: 56,
+        backgroundColor: Colors.dark.background,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        fontSize: 15,
         color: Colors.dark.text,
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
     },
-    bioHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
+    bioInput: {
+        height: 120,
+        paddingTop: 16,
+        paddingBottom: 16,
+        textAlignVertical: 'top',
     },
     charCount: {
         fontSize: 12,
-        color: '#5EEAD4',
+        color: '#6B7280',
+        marginTop: 6,
+        textAlign: 'right',
     },
-    textArea: {
-        height: 120,
-        textAlignVertical: 'top',
-        paddingTop: 16,
+    readOnlyInput: {
+        height: 56,
+        backgroundColor: '#111827',
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
+        opacity: 0.6,
     },
-    strengthContainer: {
-        marginBottom: 32,
+    readOnlyText: {
+        fontSize: 15,
+        color: '#9BA1A6',
+    },
+    strengthSection: {
+        marginBottom: 24,
     },
     strengthHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        alignItems: 'center',
+        marginBottom: 12,
     },
     strengthLabel: {
         fontSize: 14,
+        fontWeight: '600',
         color: Colors.dark.text,
+        letterSpacing: 0.2,
     },
     strengthValue: {
         fontSize: 14,
-        color: Colors.dark.tint,
-        fontWeight: 'bold',
+        fontWeight: '700',
+        letterSpacing: 0.2,
     },
-    progressBarBackground: {
+    strengthBarBg: {
         height: 8,
-        backgroundColor: '#132033',
+        backgroundColor: Colors.dark.background,
         borderRadius: 4,
         overflow: 'hidden',
     },
-    progressBarFill: {
-        width: '85%',
+    strengthBarFill: {
         height: '100%',
-        backgroundColor: Colors.dark.tint,
         borderRadius: 4,
     },
-    errorLabel: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: Colors.dark.error,
-        marginBottom: 8,
-    },
-    errorInputWrapper: {
+    errorBanner: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.dark.card,
-        borderRadius: 16,
-        borderWidth: 2,
+        backgroundColor: '#1F1212',
+        borderWidth: 1,
         borderColor: Colors.dark.error,
-        paddingHorizontal: 18,
-    },
-    errorInput: {
-        flex: 1,
-        height: 56,
-        fontSize: 16,
-        color: Colors.dark.text,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 24,
+        gap: 10,
     },
     errorText: {
         color: Colors.dark.error,
-        fontSize: 13,
-        marginTop: 8,
+        fontSize: 14,
+        flex: 1,
     },
-    successMessage: {
+    successBanner: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0D1A2C',
-        borderWidth: 1,
-        borderColor: '#1F2937',
-        borderRadius: 16,
-        paddingVertical: 18,
-        paddingHorizontal: 20,
+        backgroundColor: '#34D399',
+        borderRadius: 12,
+        padding: 16,
         marginBottom: 24,
-        gap: 12,
+        gap: 10,
     },
     successText: {
-        color: Colors.dark.tint,
+        color: '#04121C',
+        fontSize: 15,
         fontWeight: '600',
-        letterSpacing: 0.2,
     },
     saveButton: {
+        width: '100%',
         height: 56,
         backgroundColor: Colors.dark.tint,
-        borderRadius: 18,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#0F172A',
-        shadowOpacity: 0.35,
-        shadowOffset: { width: 0, height: 8 },
+        shadowColor: Colors.dark.tint,
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
         shadowRadius: 12,
         elevation: 4,
+    },
+    buttonDisabled: {
+        opacity: 0.6,
     },
     saveButtonText: {
         color: '#04121C',
         fontSize: 16,
         fontWeight: '700',
         letterSpacing: 0.3,
-    },
-    buttonDisabled: {
-        opacity: 0.7,
-    },
-    centerContent: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    readOnlyInputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1F2937', // Darker background for read-only
-        borderRadius: 16,
-        paddingHorizontal: 18,
-        borderWidth: 1,
-        borderColor: Colors.dark.border,
-    },
-    readOnlyInput: {
-        flex: 1,
-        color: '#9BA1A6', // Muted text color
-    },
-    errorMessage: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#1F1212',
-        borderWidth: 1,
-        borderColor: Colors.dark.error,
-        borderRadius: 16,
-        paddingVertical: 18,
-        paddingHorizontal: 20,
-        marginBottom: 24,
-        gap: 12,
     },
 });
