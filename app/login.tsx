@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, KeyboardAvoidingVi
 import { useRouter, Href } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useResponsive } from '@/hooks/use-responsive';
 
 import { auth, setToken } from '@/services/api';
 import { AxiosError } from 'axios';
@@ -11,6 +12,7 @@ const SUCCESS_DELAY = 900;
 
 export default function LoginScreen() {
     const router = useRouter();
+    const { isMobile } = useResponsive();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -51,87 +53,133 @@ export default function LoginScreen() {
         }
     };
 
+    const renderForm = () => (
+        <View style={styles.form}>
+            {error ? (
+                <View style={styles.globalErrorContainer}>
+                    <IconSymbol name="exclamationmark.circle" size={20} color={Colors.dark.error} />
+                    <Text style={styles.globalErrorText}>{error}</Text>
+                </View>
+            ) : null}
+
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email Address</Text>
+                <TextInput
+                    style={[styles.input, error ? styles.inputError : undefined]}
+                    placeholder="you@example.com"
+                    placeholderTextColor="#586380"
+                    value={email}
+                    onChangeText={text => {
+                        setEmail(text);
+                        if (error) setError('');
+                    }}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    returnKeyType="next"
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <View style={[styles.passwordContainer, error ? styles.inputError : undefined]}>
+                    <TextInput
+                        style={styles.passwordInput}
+                        placeholder="Enter your password"
+                        placeholderTextColor="#586380"
+                        value={password}
+                        onChangeText={text => {
+                            setPassword(text);
+                            if (error) setError('');
+                        }}
+                        secureTextEntry={!showPassword}
+                        returnKeyType="done"
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(prev => !prev)} style={styles.eyeIcon}>
+                        <IconSymbol name={showPassword ? 'eye.slash.fill' : 'eye.fill'} size={20} color="#9BA1A6" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <TouchableOpacity
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                activeOpacity={0.85}
+                disabled={isLoading}
+            >
+                <Text style={styles.buttonText}>{isLoading ? 'Logging in...' : 'Login'}</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => router.push('/signup' as Href)}>
+                    <Text style={styles.linkText}>Sign Up</Text>
+                </TouchableOpacity>
+            </View>
+
+            {isSuccess ? (
+                <View style={styles.successContainer}>
+                    <IconSymbol name="checkmark.circle.fill" size={22} color="#0F172A" />
+                    <Text style={styles.successText}>Login successful!</Text>
+                </View>
+            ) : null}
+        </View>
+    );
+
+    if (isMobile) {
+        return (
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+                    <View style={styles.header}>
+                        <View style={styles.logoContainer}>
+                            <IconSymbol name="sparkles" size={32} color={Colors.dark.tint} />
+                        </View>
+                        <Text style={styles.title}>Welcome Back</Text>
+                    </View>
+                    {renderForm()}
+                </ScrollView>
+            </KeyboardAvoidingView>
+        );
+    }
+
+    // Desktop Layout
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-                <View style={styles.header}>
-                    <View style={styles.logoContainer}>
-                        <IconSymbol name="sparkles" size={32} color={Colors.dark.tint} />
-                    </View>
-                    <Text style={styles.title}>Welcome Back</Text>
-                </View>
-
-                <View style={styles.form}>
-                    {error ? (
-                        <View style={styles.globalErrorContainer}>
-                            <IconSymbol name="exclamationmark.circle" size={20} color={Colors.dark.error} />
-                            <Text style={styles.globalErrorText}>{error}</Text>
+            <ScrollView
+                contentContainerStyle={styles.desktopScrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.desktopCard}>
+                    {/* Left branding panel */}
+                    <View style={styles.desktopLeftPanel}>
+                        <View style={styles.desktopBrandingContent}>
+                            <View style={styles.desktopLogoBox}>
+                                <IconSymbol name="sparkles" size={48} color={Colors.dark.tint} />
+                            </View>
+                            <Text style={styles.desktopBrandingTitle}>Welcome Back</Text>
+                            <Text style={styles.desktopBrandingSubtitle}>
+                                Sign in to continue crafting delightful experiences. Your analytics, profile insights,
+                                and personalized recommendations are ready whenever you are.
+                            </Text>
                         </View>
-                    ) : null}
-
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email Address</Text>
-                        <TextInput
-                            style={[styles.input, error ? styles.inputError : undefined]}
-                            placeholder="you@example.com"
-                            placeholderTextColor="#586380"
-                            value={email}
-                            onChangeText={text => {
-                                setEmail(text);
-                                if (error) setError('');
-                            }}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                            returnKeyType="next"
-                        />
+                        <Text style={styles.desktopBrandingFooter}>
+                            DESIGNED FOR TEAMS ON EVERY DEVICE
+                        </Text>
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Password</Text>
-                        <View style={[styles.passwordContainer, error ? styles.inputError : undefined]}>
-                            <TextInput
-                                style={styles.passwordInput}
-                                placeholder="Enter your password"
-                                placeholderTextColor="#586380"
-                                value={password}
-                                onChangeText={text => {
-                                    setPassword(text);
-                                    if (error) setError('');
-                                }}
-                                secureTextEntry={!showPassword}
-                                returnKeyType="done"
-                            />
-                            <TouchableOpacity onPress={() => setShowPassword(prev => !prev)} style={styles.eyeIcon}>
-                                <IconSymbol name={showPassword ? 'eye.slash.fill' : 'eye.fill'} size={20} color="#9BA1A6" />
-                            </TouchableOpacity>
-                        </View>
+                    {/* Right form panel */}
+                    <View style={styles.desktopRightPanel}>
+                        <Text style={styles.desktopFormTitle}>Welcome Back</Text>
+                        <Text style={styles.desktopFormSubtitle}>
+                            Enter your details to access your workspace.
+                        </Text>
+                        {renderForm()}
                     </View>
-
-                    <TouchableOpacity
-                        style={[styles.button, isLoading && styles.buttonDisabled]}
-                        onPress={handleLogin}
-                        activeOpacity={0.85}
-                        disabled={isLoading}
-                    >
-                        <Text style={styles.buttonText}>{isLoading ? 'Logging in...' : 'Login'}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Don't have an account? </Text>
-                        <TouchableOpacity onPress={() => router.push('/signup' as Href)}>
-                            <Text style={styles.linkText}>Sign Up</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {isSuccess ? (
-                        <View style={styles.successContainer}>
-                            <IconSymbol name="checkmark.circle.fill" size={22} color="#0F172A" />
-                            <Text style={styles.successText}>Login successful!</Text>
-                        </View>
-                    ) : null}
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -147,6 +195,78 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         padding: 24,
+    },
+    desktopScrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 48,
+    },
+    desktopCard: {
+        width: '100%',
+        maxWidth: 1280,
+        flexDirection: 'row',
+        backgroundColor: Colors.dark.card,
+        borderRadius: 32,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: Colors.dark.border,
+    },
+    desktopLeftPanel: {
+        flex: 1,
+        padding: 48,
+        justifyContent: 'space-between',
+        backgroundColor: 'rgba(52, 211, 153, 0.05)',
+    },
+    desktopBrandingContent: {
+        gap: 24,
+    },
+    desktopLogoBox: {
+        width: 80,
+        height: 80,
+        backgroundColor: 'rgba(17, 24, 39, 0.6)',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(94, 234, 212, 0.3)',
+    },
+    desktopBrandingTitle: {
+        fontSize: 40,
+        fontWeight: '700',
+        color: Colors.dark.text,
+        letterSpacing: 0.3,
+    },
+    desktopBrandingSubtitle: {
+        fontSize: 16,
+        lineHeight: 26,
+        color: '#9BA1A6',
+        letterSpacing: 0.2,
+    },
+    desktopBrandingFooter: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#6B7280',
+        letterSpacing: 2,
+    },
+    desktopRightPanel: {
+        width: 480,
+        padding: 48,
+        justifyContent: 'center',
+        backgroundColor: Colors.dark.background,
+    },
+    desktopFormTitle: {
+        fontSize: 36,
+        fontWeight: '700',
+        color: Colors.dark.text,
+        marginBottom: 8,
+        letterSpacing: 0.3,
+    },
+    desktopFormSubtitle: {
+        fontSize: 16,
+        color: '#9BA1A6',
+        marginBottom: 40,
+        letterSpacing: 0.2,
     },
     header: {
         alignItems: 'center',
