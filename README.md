@@ -94,7 +94,7 @@ constants/
 - **Touch-optimized** UI for mobile devices
 - **Keyboard-aware** forms with proper behavior
 
-## 🛠️ Technologies
+## Technologies
 
 | Category | Technology | Purpose |
 |----------|-----------|---------|
