@@ -41,7 +41,7 @@ The app connects to the FastAPI backend at `http://localhost:8000`. Ensure the b
 **Backend Requirements:**
 - FastAPI server running on port 8000
 - MySQL database with user profiles table
-- CORS enabled for `http://localhost:8081` and `http://localhost:8082`
+- CORS enabled
 
 ## Project Structure
 
