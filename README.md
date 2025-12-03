@@ -32,8 +32,6 @@ Create a `.env` file (optional - defaults are configured):
 ```env
 # API Configuration
 API_BASE_URL=http://localhost:8000
-
-# Platform-specific settings handled automatically
 ```
 
 ### Backend Connection
