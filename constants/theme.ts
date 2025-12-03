@@ -19,11 +19,14 @@ export const Colors = {
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
+    background: '#0B1120', // Dark Blue Background
+    tint: '#4ADE80', // Teal/Green Accent
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: '#4ADE80',
+    card: '#111827', // Slightly lighter dark blue for cards/inputs
+    border: '#1F2937',
+    error: '#EF4444',
   },
 };
 
