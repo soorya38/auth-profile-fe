@@ -62,7 +62,7 @@ export default function ProfileScreen() {
                 <View style={styles.header}>
                     <View style={styles.avatarContainer}>
                         <Image
-                            source={{ uri: 'https://i.pravatar.cc/150?img=12' }} // Still using mock avatar as API doesn't provide one
+                            source={{ uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name || 'User')}&background=random&size=150` }}
                             style={styles.avatar}
                         />
                         <View style={styles.avatarRing} />

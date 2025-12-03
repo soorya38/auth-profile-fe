@@ -100,7 +100,7 @@ export default function EditProfileScreen() {
                     <View style={styles.avatarSection}>
                         <View style={styles.avatarContainer}>
                             <Image
-                                source={{ uri: 'https://i.pravatar.cc/150?img=5' }}
+                                source={{ uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=random&size=150` }}
                                 style={styles.avatar}
                             />
                             <TouchableOpacity style={styles.editIconContainer} activeOpacity={0.8}>
